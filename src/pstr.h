@@ -18,6 +18,7 @@ pstr* pstr_cat_pstr(pstr *ps, pstr* cs);
 pstr* pstr_popleft(pstr *ps, size_t n);
 pstr* pstr_popright(pstr *ps, size_t n);
 size_t pstr_len(pstr *ps);
+int pstr_find(pstr *ps, pstr* subps);
 void pstr_free();
 void pstr_print(pstr *ps);
 

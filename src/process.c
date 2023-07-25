@@ -9,9 +9,15 @@
 #include <signal.h>
 #include "pstr.h"
 #include "process.h"
+#include <time.h>
 
 pidNode* head = NULL;
 pstr* buffer = NULL;
+
+#define READ_BLOCK 0
+#define READ_ONBLOCK 1
+
+#define while_timer(n) for(time_t end = time(NULL) + n; time(NULL) < end; )
 
 void fillbuffer(Process *p, size_t n, float timeout);
 
@@ -30,8 +36,9 @@ int process_send_raw(Process *p, pstr* ps) {
     return length;
 }
 
-pstr* process_readuntil(Process *p, pstr* pattern, float timeout) {
-    while(1) {
+pstr* process_readuntil(Process *p, pstr* pattern, int timeout) {
+    pstr* readbuf = pstr_new("");
+    while_timer(timeout) {
 
     }
 }

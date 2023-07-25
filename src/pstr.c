@@ -142,6 +142,30 @@ size_t pstr_len(pstr *ps) {
     return ps->length; 
 }
 
+/**
+ * Find the first occurence of a substring 
+ * 
+ * Function is binary safe and will not threat any null byte as terminator
+ * Return -1 if no match found
+*/
+int pstr_find(pstr* ps, pstr* subps) {
+    // If the substring is longer than the string, it can't be found
+    if (subps->length > ps->length) {
+        return -1;
+    }
+
+    for (size_t i = 0; i <= ps->length - subps->length; ++i) {
+        // Check if substr->buf matches str1->buf starting at position i
+        if (memcmp(ps->buf + i, subps->buf, subps->length) == 0) {
+            // Match found
+            return i;
+        }
+    }
+
+    // No match found
+    return -1;
+}
+
 
 void pstr_free(pstr *ps) {
     if (ps->buf == NULL) { return; }

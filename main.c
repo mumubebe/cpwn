@@ -71,4 +71,11 @@ void pstr_test() {
     assert(pstr_len(y) == 4);
     pstr_free(x);
     pstr_free(y);
+
+
+    x = pstr_new("Hello");
+    y = pstr_new("ll");
+    int index = pstr_find(x, y);
+    assert(index == 2);
+
 }
