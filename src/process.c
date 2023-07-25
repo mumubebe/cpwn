@@ -30,6 +30,10 @@ int process_send_raw(Process *p, pstr* ps) {
     return length;
 }
 
+pstr* process_readuntil(Process *p, pstr* pattern, float timeout) {
+
+}
+
 
 pstr* process_recv(Process *p, size_t n, float timeout) {
     if ((p->buffer->length > n)) {
@@ -45,7 +49,8 @@ void fillbuffer(Process *p, size_t n, float timeout) {
     pstr* recv = process_recv_raw(p, n, timeout);
 
     if (recv->length > 0) {
-        pstr* catres = pstr_cat_pstr(p->buffer, recv);
+        p->buffer = pstr_cat_pstr(p->buffer, recv);
+
     }
 
 }

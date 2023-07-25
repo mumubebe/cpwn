@@ -120,6 +120,6 @@ size_t pstr_len(pstr *ps) {
 
 
 void pstr_free(pstr *ps) {
+    if (ps->buf == NULL) { return; }
     free(ps->buf);
-    free(ps);
 }

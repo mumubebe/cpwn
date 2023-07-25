@@ -28,36 +28,40 @@ void process_test() {
 
 
 void pstr_test() {
-    pstr* str1 = pstr_new("hello");
-    assert(strlen(str1->buf) == 5);
-    assert(pstr_len(str1) == 5);
+    pstr* x;
+    pstr* y;
+    pstr* z;
 
-    pstr* bstr1 = pstr_new_raw("hello\x00\x04there", 12);
-    assert(strlen(bstr1->buf) == 5);
-    assert(pstr_len(bstr1) == 12);
+    x = pstr_new("hello");
+    assert(strlen(x->buf) == 5);
+    assert(pstr_len(x) == 5);
+    pstr_free(x);
 
-    pstr* bstr2 = pstr_cat(bstr1, "!!!");
-    assert(strlen(bstr2->buf) == 5);
-    assert(pstr_len(bstr2) == 15);
+    x = pstr_new_raw("hello\x00\x04there", 12);
+    assert(strlen(x->buf) == 5);
+    assert(pstr_len(x) == 12);
+    pstr_cat(x, "!!!");
+    assert(strlen(x->buf) == 5);
+    assert(pstr_len(x) == 15);
+    pstr_free(x);
 
-    pstr* pcatp1 = pstr_new("");
-    pstr* pcatp2 = pstr_new("ABC");
-    pstr* pcatres = pstr_cat_pstr(pcatp1, pcatp2);
-    assert(pstr_len(pcatres) == 3);
+    x = pstr_new("");
+    y = pstr_new("ABC");
+    pstr_cat_pstr(x, y);
+    assert(pstr_len(x) == 3);
+    pstr_free(x);
+    pstr_free(y);
 
+    x = pstr_new("ABCDEF");
+    y = pstr_pop(x, 2);
+    assert(pstr_len(x) == 4 );
+    assert(pstr_len(y) == 2 );
+    pstr_free(x);
+    pstr_free(y);
 
-    pstr* popstr1 = pstr_new("ABCDEF");
-    pstr* substr1 = pstr_pop(popstr1, 2);
-    assert(pstr_len(popstr1) == 4 );
-    assert(pstr_len(substr1) == 2 );
-
-    printf("%s\n", substr1->buf);
-    printf("%s\n", popstr1->buf);
-
-    pstr* popstr2 = pstr_new_raw("ABCD\x04\x00\EF", 8);
-    pstr* substr2 = pstr_pop(popstr2, 4);
-    assert(pstr_len(substr2) == 4);
-
-
-
+    x = pstr_new_raw("ABCD\x04\x00\EF", 8);
+    y = pstr_pop(x, 4);
+    assert(pstr_len(y) == 4);
+    pstr_free(x);
+    pstr_free(y);
 }
