@@ -5,6 +5,10 @@
 #include "pstr.h"
 
 void pstr_resize_length(pstr* ps, size_t n);
+pstr* pstr_pop(pstr* ps, size_t n, int type);
+
+#define POPRIGHT 0
+#define POPLEFT 1
 
 /**
  * Create a new pstr from a char*
@@ -83,15 +87,7 @@ void pstr_print(pstr *ps) {
     putchar('\n');
 }
 
-/**
- * Pops off n length pstr of a pstr
- * 
- * If a pstr1 containing "ABCDEF" and calls pop(ps, 2), the pstr1 
- * will be modified in place so that it will contain "ABCD" (with null terminator) and a 
- * new, pstr2, containing "EF" returns
- * 
-*/
-pstr* pstr_pop(pstr *ps, size_t n) {
+pstr* pstr_pop(pstr *ps, size_t n, int type) {
     if (n > ps->length) {
         n = ps->length;
     }
@@ -101,11 +97,39 @@ pstr* pstr_pop(pstr *ps, size_t n) {
         return NULL;
     }
 
-    memmove(poped, ps->buf+ps->length-n, n+1);
-    pstr_resize_length(ps, ps->length-n); 
-
+    if (type == POPRIGHT) {
+        memmove(poped, ps->buf+ps->length-n, n+1);
+    } else {
+        memmove(poped, ps->buf, n);
+        poped[n+1] = '\00';
+    }
+    pstr_resize_length(ps, ps->length-n);
 
     return pstr_new_raw(poped, n);
+}
+
+/**
+ * right pop n length pstr
+ * 
+ * If a pstr1 containing "ABCDEF" and calls pop(ps, 2), the pstr1 
+ * will be modified in place so that it will contain "ABCD" (with null terminator) and a 
+ * new, pstr2, containing "EF" returns
+ * 
+*/
+pstr* pstr_popright(pstr *ps, size_t n) {
+    return pstr_pop(ps, n, POPRIGHT);
+}
+
+/**
+ * left pop n length pstr
+ * 
+ * If a pstr1 containing "ABCDEF" and calls pop(ps, 2), the pstr1 
+ * will be modified in place so that it will contain "ABCD" (with null terminator) and a 
+ * new, pstr2, containing "AB" returns
+ * 
+*/
+pstr* pstr_popleft(pstr *ps, size_t n) {
+    return pstr_pop(ps, n, POPLEFT);
 }
 
 

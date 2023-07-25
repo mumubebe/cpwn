@@ -31,18 +31,19 @@ int process_send_raw(Process *p, pstr* ps) {
 }
 
 pstr* process_readuntil(Process *p, pstr* pattern, float timeout) {
+    while(1) {
 
+    }
 }
 
 
 pstr* process_recv(Process *p, size_t n, float timeout) {
     if ((p->buffer->length > n)) {
-        return pstr_pop(p->buffer, n);
+        return pstr_popleft(p->buffer, n);
     } 
     fillbuffer(p, n, timeout);
     
-    return pstr_pop(p->buffer, n);
-    
+    return pstr_popleft(p->buffer, n);
 }
 
 void fillbuffer(Process *p, size_t n, float timeout) {
@@ -50,9 +51,7 @@ void fillbuffer(Process *p, size_t n, float timeout) {
 
     if (recv->length > 0) {
         p->buffer = pstr_cat_pstr(p->buffer, recv);
-
     }
-
 }
 
 /*

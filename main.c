@@ -53,14 +53,21 @@ void pstr_test() {
     pstr_free(y);
 
     x = pstr_new("ABCDEF");
-    y = pstr_pop(x, 2);
+    y = pstr_popright(x, 2);
+    assert(pstr_len(x) == 4 );
+    assert(pstr_len(y) == 2 );
+    pstr_free(x);
+    pstr_free(y);
+
+    x = pstr_new("ABCDEF");
+    y = pstr_popleft(x, 2);
     assert(pstr_len(x) == 4 );
     assert(pstr_len(y) == 2 );
     pstr_free(x);
     pstr_free(y);
 
     x = pstr_new_raw("ABCD\x04\x00\EF", 8);
-    y = pstr_pop(x, 4);
+    y = pstr_popright(x, 4);
     assert(pstr_len(y) == 4);
     pstr_free(x);
     pstr_free(y);
