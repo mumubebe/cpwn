@@ -10,9 +10,10 @@
 #include "pstr.h"
 #include "process.h"
 
-
 pidNode* head = NULL;
 pstr* buffer = NULL;
+
+void fillbuffer(Process *p, size_t n, float timeout);
 
 
 int process_sendline(Process *p, pstr *ps) {
@@ -30,37 +31,50 @@ int process_send_raw(Process *p, pstr* ps) {
 }
 
 
+pstr* process_recv(Process *p, size_t n, float timeout) {
+    if ((p->buffer->length > n)) {
+        return pstr_pop(p->buffer, n);
+    } 
+    fillbuffer(p, n, timeout);
+    
+    return pstr_pop(p->buffer, n);
+    
+}
+
+void fillbuffer(Process *p, size_t n, float timeout) {
+    pstr* recv = process_recv_raw(p, n, timeout);
+
+    if (recv->length > 0) {
+        pstr* catres = pstr_cat_pstr(p->buffer, recv);
+    }
+
+}
+
 /*
  * Recv number `n` bytes from process
  * 
  * if timeout or EOF is reached, return value points to an empty string.
 */
-char* process_recv_raw(Process *p, int n, float timeout) {
+pstr* process_recv_raw(Process *p, size_t n, float timeout) {
     if (process_can_recv_raw(p, timeout)) {
-        char* buf = malloc((n+1) * sizeof(char));
+        char* buf = malloc(sizeof(char) * n);
         
         if (!buf) {
             perror("malloc");
             return NULL;
         }
-        int len;
+        size_t len;
         len = read(p->fd_out[READ_END], buf, n-1);
         if (len == -1) {
             perror("read");
-            return "";
+            return pstr_new("");
         }
 
         if (len) {
-            buf[len] = '\0';
-            return buf;
+            return pstr_new_raw(buf, len);
         }
     }
-    return "";
-}
-
-
-pstr* process_recv(size_t n, float timeout) {
-    
+    return pstr_new("");
 }
 
 
@@ -128,6 +142,10 @@ int init_process(Process *p) {
             head->prev = pid_node;
         }
         head = pid_node;
+
+
+        /* init empty to process struct */
+        p->buffer = pstr_new("");
         
         /* Register kill process atexit */
         atexit(kill_processes);

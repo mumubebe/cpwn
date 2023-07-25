@@ -15,11 +15,11 @@ int main() {
 
     init_process(&p);
 
-    pstr* payload = pstr_new("2");
-    printf("%s\n", process_recv_raw(&p, 100, 50));
+    pstr* payload = pstr_new("Hello There");
+
     process_sendline(&p, payload);
-    process_sendline(&p, payload);
-    printf("%s\n", process_recv_raw(&p, 100, 50));
+    pstr* r = process_recv(&p, 100, 50);
+    pstr_print(r);
 }
 
 void process_test() {
@@ -39,6 +39,12 @@ void pstr_test() {
     pstr* bstr2 = pstr_cat(bstr1, "!!!");
     assert(strlen(bstr2->buf) == 5);
     assert(pstr_len(bstr2) == 15);
+
+    pstr* pcatp1 = pstr_new("");
+    pstr* pcatp2 = pstr_new("ABC");
+    pstr* pcatres = pstr_cat_pstr(pcatp1, pcatp2);
+    assert(pstr_len(pcatres) == 3);
+
 
     pstr* popstr1 = pstr_new("ABCDEF");
     pstr* substr1 = pstr_pop(popstr1, 2);

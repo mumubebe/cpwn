@@ -41,13 +41,19 @@ pstr* pstr_grow(pstr *ps, size_t length) {
     return ps;
 }
 
+pstr* pstr_cat_pstr(pstr *ps, pstr* cs) {
+    return pstr_cat_raw(ps, cs->buf, cs->length);
+}
+
 pstr* pstr_cat_raw(pstr *ps, char * cs, size_t length) {
+    if (length == 0) {
+        return ps;
+    }
     ps = pstr_grow(ps, length + 1);
 
     /* Copy new str including nul byte */
     memcpy(ps->buf + ps->length, cs, length + 1);
     ps->length = ps->length + length; 
-    
     return ps;
 }
 
