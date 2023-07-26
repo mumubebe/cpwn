@@ -74,14 +74,44 @@ pstr* pstr_cat(pstr *ps, char* cs) {
  * does not include null terminator \x00
 */
 void pstr_print(pstr *ps) {
+    if (ps == NULL || ps->buf == NULL) {
+        printf("<pstr: NULL>\n");
+        return;
+    }
     int n = 0;
     while(n < ps->length) {
         unsigned char c = ps->buf[n];
-        if (isprint(c)) {
-            putchar(c);
-        } else {
-            printf("\\x%02x", c);
+        switch(c) {
+            case '\n': printf("\\n"); break;
+            case '\t': printf("\\t"); break;
+            case '\v': printf("\\v"); break;
+            case '\b': printf("\\b"); break;
+            case '\r': printf("\\r"); break;
+            case '\f': printf("\\f"); break;
+            case '\a': printf("\\a"); break;
+            case '\\': printf("\\\\"); break;
+            default:
+                if (isprint(c)) {
+                    putchar(c);
+                } else {
+                    printf("\\x%02x", c);
+                }
         }
+        n++;
+    }
+    putchar('\n');
+}
+
+
+void pstr_pprint(pstr *ps) {
+    if (ps == NULL || ps->buf == NULL) {
+        printf("<pstr: NULL>\n");
+        return;
+    }
+    int n = 0;
+    while (n < ps->length) {
+        unsigned char c = ps->buf[n];
+        putchar(c);
         n++;
     }
     putchar('\n');
@@ -168,6 +198,6 @@ int pstr_find(pstr* ps, pstr* subps) {
 
 
 void pstr_free(pstr *ps) {
-    if (ps->buf == NULL) { return; }
+    if (ps == NULL || ps->buf == NULL) { return; }
     free(ps->buf);
 }

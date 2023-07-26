@@ -8,18 +8,12 @@ void process_test();
 
 int main() {
     Process p = {
-        .cmd = "/usr/bin/cat"
+        .cmd = "nc -lvnp 4443"
     };
-
-    pstr_test();
-
     init_process(&p);
-
-    pstr* payload = pstr_new("Hello There");
-
-    process_sendline(&p, payload);
-    pstr* r = process_recv(&p, 100, 50);
-    pstr_print(r);
+    
+    pstr* r = process_readuntil(&p, pstr_new_raw("\x04\x05", 2), 20);
+    pstr_pprint(r);
 }
 
 void process_test() {
@@ -77,5 +71,8 @@ void pstr_test() {
     y = pstr_new("ll");
     int index = pstr_find(x, y);
     assert(index == 2);
+    pstr_free(x);
+    pstr_free(y);
 
+    
 }

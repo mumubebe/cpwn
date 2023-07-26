@@ -21,5 +21,6 @@ size_t pstr_len(pstr *ps);
 int pstr_find(pstr *ps, pstr* subps);
 void pstr_free();
 void pstr_print(pstr *ps);
+void pstr_pprint(pstr *ps);
 
 #endif 

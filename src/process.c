@@ -18,6 +18,7 @@ pstr* buffer = NULL;
 #define READ_ONBLOCK 1
 
 #define while_timer(n) for(time_t end = time(NULL) + n; time(NULL) < end; )
+#define timeleft end-time(NULL)
 
 void fillbuffer(Process *p, size_t n, float timeout);
 
@@ -35,12 +36,48 @@ int process_send_raw(Process *p, pstr* ps) {
 
     return length;
 }
+/**
+ *   Receive data until pattern is encountered.
 
+    If the request is not satisfied before int timeout seconds(!) pass,
+    all data is buffered and an empty pstr ("") is returned.
+*/
 pstr* process_readuntil(Process *p, pstr* pattern, int timeout) {
     pstr* readbuf = pstr_new("");
+    pstr* curr = NULL;
+    pstr* rest = NULL;
+    int index;
     while_timer(timeout) {
+        if (curr != NULL) {
+            pstr_free(rest);
 
+            rest = pstr_popright(curr, pstr_len(pattern));
+            pstr_cat_pstr(readbuf, curr);
+        }
+
+        curr = process_recv(p, 1024, timeleft);
+
+        if (rest != NULL) {
+            // fix this with a left concat later (implement in pstr).. :)
+            pstr_cat_pstr(rest, curr);
+            curr = rest;
+        }
+        index = pstr_find(curr, pattern);
+        if (index != -1) {
+            // Get str up to found index
+            pstr* uptoindex = pstr_popleft(curr, index); 
+            pstr_cat_pstr(readbuf, uptoindex);
+
+            // Put rest to buffer
+            pstr_cat_pstr(p->buffer, curr);
+
+            return readbuf;
+        }
     }
+    pstr_cat_pstr(p->buffer, readbuf);
+    pstr_free(readbuf);
+    pstr_free(curr);
+    return pstr_new("");
 }
 
 
@@ -102,7 +139,8 @@ int process_can_recv_raw(Process *p, float timeout) {
     fds[0].fd = p->fd_out[READ_END];
     fds[0].events = POLLIN;
 
-    int ret = poll(fds, 1, timeout);
+    // poll takes timeout as millisecs
+    int ret = poll(fds, 1, timeout*1000.0f);
 
     if (ret == -1) {
         perror("poll");
@@ -154,8 +192,10 @@ int init_process(Process *p) {
         }
         head = pid_node;
 
+        close(fd_in[READ_END]);
+        close(fd_out[WRITE_END]);
 
-        /* init empty to process struct */
+        /* init empty buffer to process struct */
         p->buffer = pstr_new("");
         
         /* Register kill process atexit */
@@ -163,9 +203,16 @@ int init_process(Process *p) {
     } 
     else {
         /* Duplicate FD to FD2, closing FD2 and making it open on the same file */
+        
+        close(fd_in[WRITE_END]);
+        close(fd_out[READ_END]);
+
         dup2(fd_in[READ_END], STDIN_FILENO);
         dup2(fd_out[WRITE_END], STDOUT_FILENO);
+        dup2(fd_out[WRITE_END], STDERR_FILENO);
 
+        close(fd_in[READ_END]);
+        close(fd_out[WRITE_END]);
         
         char *args[] = {p->cmd, NULL};
         char *envp[] = {NULL};
