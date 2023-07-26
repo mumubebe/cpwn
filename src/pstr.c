@@ -117,6 +117,9 @@ void pstr_pprint(pstr *ps) {
     putchar('\n');
 }
 
+/**
+ * see pstr_popright(), pstr_popleft()
+*/
 pstr* pstr_pop(pstr *ps, size_t n, int type) {
     if (n > ps->length) {
         n = ps->length;
@@ -129,11 +132,14 @@ pstr* pstr_pop(pstr *ps, size_t n, int type) {
 
     if (type == POPRIGHT) {
         memmove(poped, ps->buf+ps->length-n, n+1);
+        pstr_resize_length(ps, ps->length-n);
     } else {
         memmove(poped, ps->buf, n);
         poped[n+1] = '\00';
+
+        memmove(ps->buf, ps->buf+n, ps->length-n);
+        pstr_resize_length(ps, ps->length-n);
     }
-    pstr_resize_length(ps, ps->length-n);
 
     return pstr_new_raw(poped, n);
 }

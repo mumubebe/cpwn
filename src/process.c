@@ -67,10 +67,8 @@ pstr* process_readuntil(Process *p, pstr* pattern, int timeout) {
             // Get str up to found index
             pstr* uptoindex = pstr_popleft(curr, index); 
             pstr_cat_pstr(readbuf, uptoindex);
-
             // Put rest to buffer
             pstr_cat_pstr(p->buffer, curr);
-
             return readbuf;
         }
     }

@@ -1,5 +1,6 @@
 #include "src/process.h"
 #include "src/pstr.h"
+#include "src/utils.h"
 #include <assert.h>
 
 
@@ -13,7 +14,12 @@ int main() {
     init_process(&p);
     
     pstr* r = process_readuntil(&p, pstr_new_raw("\x04\x05", 2), 20);
-    pstr_pprint(r);
+    pstr_print(r);
+
+    pstr_print(process_recv(&p, 10, 5));
+
+
+    pstr_print(p64(1337, "l2ittle"));
 }
 
 void process_test() {
