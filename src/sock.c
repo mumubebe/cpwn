@@ -1,0 +1,3 @@
+void remote_init() {
+
+}

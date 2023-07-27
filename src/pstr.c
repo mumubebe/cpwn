@@ -21,7 +21,7 @@ pstr* pstr_new(char *init) {
 }
 
 /**
- * Create a pstr,
+ * Create a binary safe pstr, expects a length 
  * 
 */
 pstr* pstr_new_raw(char *init, size_t length) {
@@ -44,28 +44,31 @@ pstr* pstr_grow(pstr *ps, size_t length) {
     
     return ps;
 }
-
-pstr* pstr_cat_pstr(pstr *ps, pstr* cs) {
-    return pstr_cat_raw(ps, cs->buf, cs->length);
+/**
+ * Concat pstr with another prst, modified in place
+*/
+pstr* pstr_cat_pstr(pstr *ps1, pstr* ps2) {
+    return pstr_cat_raw(ps1, ps2->buf, ps2->length);
 }
 
-pstr* pstr_cat_raw(pstr *ps, char * cs, size_t length) {
+pstr* pstr_cat_raw(pstr *ps1, char *cs, size_t length) {
     if (length == 0) {
-        return ps;
+        return ps1;
     }
-    ps = pstr_grow(ps, length + 1);
+    ps1 = pstr_grow(ps1, length + 1);
 
     /* Copy new str including nul byte */
-    memcpy(ps->buf + ps->length, cs, length + 1);
-    ps->length = ps->length + length; 
-    return ps;
+    memcpy(ps1->buf + ps1->length, cs, length + 1);
+    ps1->length = ps1->length + length; 
+    return ps1;
 }
 
 /**
- * Concates pstr with a char*, expects a null terminated char*
+ * Concates pstr ps1 with a char*, expects a null terminated char*
+ * modified in place
 */
-pstr* pstr_cat(pstr *ps, char* cs) {
-    return pstr_cat_raw(ps, cs, strlen(cs));
+pstr* pstr_cat(pstr *ps1, char* cs) {
+    return pstr_cat_raw(ps1, cs, strlen(cs));
 }
 
 
