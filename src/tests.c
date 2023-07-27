@@ -5,6 +5,7 @@
 #include "process.h"
 #include <sys/wait.h>
 #include <unistd.h>
+#include "utils.h"
 
 
 void process_test() {
@@ -17,20 +18,35 @@ void process_test() {
         .cmd = "nc localhost 4443"
     };
     pstr* r;
+    pstr* s;
+    pstr* t;
     init_process(&p2);
 
     // recvuntil
-    process_sendline(&p2, pstr_new("123ABC"));
+    s = pstr_new("123ABC");
+    process_sendline(&p2, s);
     usleep(10);
-    process_recvuntil(&p1, pstr_new("123"), 2);
+
+    t = pstr_new("123");
+    process_recvuntil(&p1, t, 2);
+    pstr_free(t);
+
     r = process_recv(&p1, 100, 1);
-    assert(pstr_cmp(pstr_new("ABC\n"), r) == 0); 
-    
+    t = pstr_new("ABC\n");
+    assert(pstr_cmp(t, r) == 0); 
+    pstr_free(r);
+    pstr_free(t);
+    pstr_free(s);
+
     // raw send/recv
-    process_send(&p2, pstr_new_raw("\x01\x02\x03\x04", 4));
-    r = process_recv(&p1, 100, 1);
+    s = pstr_new_raw("\x01\x02\x03\x04", 4); 
+    process_send(&p2, s);
     usleep(10);
-    assert(pstr_cmp(pstr_new_raw("\x01\x02\x03\x04", 4), r) == 0);
+    
+    r = process_recv(&p1, 100, 1);
+    assert(pstr_cmp(s, r) == 0);
+    pstr_free(r);
+    pstr_free(s);
 
     printf("process_test: success\n");
 }
@@ -90,4 +106,36 @@ void pstr_test() {
 
     printf("pstr_test: success\n");
     
+}
+
+void utils_test() {
+    pstr* x;
+    pstr* y;
+
+    x = p64(1, "little");
+    y = pstr_new_raw("\x01\x00\x00\x00\x00\x00\x00\x00", 8);
+    assert(pstr_cmp(x, y) == 0);
+    pstr_free(x);
+    pstr_free(y);
+
+    x = p64(0xffffffffffffffff, "little");
+    y = pstr_new_raw("\xff\xff\xff\xff\xff\xff\xff\xff", 8);
+    assert(pstr_cmp(x, y) == 0);
+    pstr_free(x);
+    pstr_free(y);
+
+    x = p64(1, "big");
+    y = pstr_new_raw("\x00\x00\x00\x00\x00\x00\x00\x01", 8);
+    assert(pstr_cmp(x, y) == 0);
+    pstr_free(x);
+    pstr_free(y);
+    
+    x = p32(1, "little");
+    y = pstr_new_raw("\x01\x00\x00\x00", 4);
+    assert(pstr_cmp(x, y) == 0);
+    pstr_free(x);
+    pstr_free(y);
+    
+    printf("utils_test: success\n");
+
 }

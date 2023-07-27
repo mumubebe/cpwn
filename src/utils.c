@@ -18,9 +18,9 @@ pstr* p64(u_int64_t value, char *endian) {
     return pstr_new_raw(out64, sizeof(out64));
 }
 
-pstr* p32(u_int32_t value, int endian) {
+pstr* p32(u_int32_t value, char *endian) {
     char out32[4];
-    to_bytestr(&value, sizeof(out32), out32, endian);
+    to_bytestr(&value, sizeof(out32), out32, validate_endian(endian));
     return pstr_new_raw(out32, sizeof(out32));
 }
 

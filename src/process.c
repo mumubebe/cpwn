@@ -26,11 +26,11 @@ int process_can_recv_raw(Tube *tb, float timeout);
 pstr* process_recv_raw(Tube* tb, size_t n, float timeout);
 
 int process_sendline(Process *p, pstr *ps) {
-    sendline(p->tube, ps);
+    tube_sendline(p->tube, ps);
 }
 
 int process_send(Process *p, pstr* ps) {
-    send(p->tube, ps);    
+    tube_send(p->tube, ps);    
 }
 /**
  *   Receive data until pattern is encountered.
@@ -39,12 +39,12 @@ int process_send(Process *p, pstr* ps) {
     all data is buffered and an empty pstr ("") is returned.
 */
 pstr* process_recvuntil(Process *p, pstr* pattern, int timeout) {
-    return recvuntil(p->tube, pattern, timeout, process_recv_raw);
+    return tube_recvuntil(p->tube, pattern, timeout, process_recv_raw);
 }
 
 
 pstr* process_recv(Process *p, size_t n, float timeout) {
-    recv(p->tube, n, timeout, process_recv_raw);
+    tube_recv(p->tube, n, timeout, process_recv_raw);
 }
 
 
@@ -62,7 +62,7 @@ pstr* process_recv_raw(Tube *tb, size_t n, float timeout) {
             return NULL;
         }
         size_t len;
-        len = read(tb->fd_out[READ_END], buf, n-1);
+        len = read(tb->fd_out, buf, n-1);
         if (len == -1) {
             perror("read");
             return pstr_new("");
@@ -86,7 +86,7 @@ int process_can_recv_raw(Tube* tb, float timeout) {
     /* Setup poll */
     struct pollfd fds[1];
 
-    fds[0].fd = tb->fd_out[READ_END];
+    fds[0].fd = tb->fd_out;
     fds[0].events = POLLIN;
 
     // poll takes timeout as millisecs
@@ -132,9 +132,8 @@ int init_process(Process *p) {
         tube->buffer = pstr_new("");       
         
         /* Stores file descriptors in current process struct */
-        memcpy(tube->fd_in, fd_in, sizeof(tube->fd_in));
-        memcpy(tube->fd_out, fd_out, sizeof(tube->fd_out));
-
+        tube->fd_out = fd_out[READ_END];
+        tube->fd_in = fd_in[WRITE_END];
         p->tube = tube;
 
         pidNode* pid_node = malloc(sizeof(pidNode));

@@ -16,13 +16,13 @@
 #define while_timer(n) for(time_t end = time(NULL) + n; time(NULL) < end; )
 #define timeleft end-time(NULL)
 
-int sendline(Tube* tb, pstr* ps) {
+int tube_sendline(Tube* tb, pstr* ps) {
     pstr* ps2 = pstr_cat_raw(ps, "\n", 1);
-    send(tb, ps2);
+    tube_send(tb, ps2);
 }
 
-int send(Tube* tb, pstr* ps) {
-    int length = write(tb->fd_in[WRITE_END], ps->buf, ps->length);
+int tube_send(Tube* tb, pstr* ps) {
+    int length = write(tb->fd_in, ps->buf, ps->length);
     if (length < 0) {
         perror("write");
     }
@@ -30,7 +30,7 @@ int send(Tube* tb, pstr* ps) {
 }
 
 
-pstr* recv(Tube* tb, size_t n, float timeout, pstr* (*recv_raw)(Tube*, size_t, float)) {
+pstr* tube_recv(Tube* tb, size_t n, float timeout, pstr* (*recv_raw)(Tube*, size_t, float)) {
     if ((tb->buffer->length > n)) {
         return pstr_popleft(tb->buffer, n);
     } 
@@ -44,6 +44,7 @@ void fillbuffer(Tube *tb, size_t n, float timeout, pstr* (*recv_raw)(Tube*, size
 
     if (recv->length > 0) {
         tb->buffer = pstr_cat_pstr(tb->buffer, recv);
+        pstr_free(recv);
     }
 }
 
@@ -53,7 +54,7 @@ void fillbuffer(Tube *tb, size_t n, float timeout, pstr* (*recv_raw)(Tube*, size
     If the request is not satisfied before int timeout seconds(!) pass,
     all data is buffered and an empty pstr ("") is returned.
 */
-pstr* recvuntil(Tube *tb, pstr* pattern, int timeout, pstr* (*recv_raw)(Tube*, size_t, float)) {
+pstr* tube_recvuntil(Tube *tb, pstr* pattern, int timeout, pstr* (*recv_raw)(Tube*, size_t, float)) {
     pstr* readbuf = pstr_new("");
     pstr* curr = NULL;
     pstr* rest = NULL;
@@ -66,7 +67,7 @@ pstr* recvuntil(Tube *tb, pstr* pattern, int timeout, pstr* (*recv_raw)(Tube*, s
             pstr_cat_pstr(readbuf, curr);
         }
 
-        curr = recv(tb, 1024, timeleft, recv_raw);
+        curr = tube_recv(tb, 1024, timeleft, recv_raw);
 
         if (rest != NULL) {
             // fix this with a left concat later (implement in pstr).. :)
@@ -80,6 +81,7 @@ pstr* recvuntil(Tube *tb, pstr* pattern, int timeout, pstr* (*recv_raw)(Tube*, s
             pstr_cat_pstr(readbuf, uptoindex);
             // Put rest to buffer
             pstr_cat_pstr(tb->buffer, curr);
+            pstr_free(uptoindex);
             return readbuf;
         }
     }

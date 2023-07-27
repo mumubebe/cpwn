@@ -1,7 +1,4 @@
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include "pstr.h"
 #include "tube.h"
 
@@ -11,9 +8,11 @@
 typedef struct Sock {
     char* host;
     int port;
-    Tube tube;
+    Tube* tube;
 } Sock;
 
 typedef struct Sock Remote;
+
+void remote_init(Sock *sock);
 
 #endif
