@@ -171,6 +171,17 @@ pstr* pstr_popleft(pstr *ps, size_t n) {
     return pstr_pop(ps, n, POPLEFT);
 }
 
+/**
+ * Compare two pstr
+ * 
+ * return 0 if length and buff is equal, else -1
+*/
+int pstr_cmp(pstr *ps1, pstr *ps2) {
+    if (pstr_len(ps1) == pstr_len(ps2)) {
+        return memcmp(ps1->buf, ps2->buf, pstr_len(ps1));
+    }
+    return -1;
+}
 
 void pstr_resize_length(pstr *ps, size_t length) {
     ps->length = length;

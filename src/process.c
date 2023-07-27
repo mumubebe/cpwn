@@ -38,8 +38,8 @@ int process_send(Process *p, pstr* ps) {
     If the request is not satisfied before int timeout seconds(!) pass,
     all data is buffered and an empty pstr ("") is returned.
 */
-pstr* process_readuntil(Process *p, pstr* pattern, int timeout) {
-    return readuntil(p->tube, pattern, timeout, process_recv_raw);
+pstr* process_recvuntil(Process *p, pstr* pattern, int timeout) {
+    return recvuntil(p->tube, pattern, timeout, process_recv_raw);
 }
 
 

@@ -22,5 +22,6 @@ int pstr_find(pstr *ps, pstr* subps);
 void pstr_free();
 void pstr_print(pstr *ps);
 void pstr_pprint(pstr *ps);
+int pstr_cmp(pstr *ps1, pstr *ps2);
 
 #endif 

@@ -2,6 +2,38 @@
 #include <assert.h>
 #include <stdio.h>
 #include "pstr.h"
+#include "process.h"
+#include <sys/wait.h>
+#include <unistd.h>
+
+
+void process_test() {
+    Process p1 = {
+        .cmd = "nc -lvnp 4443"
+    };
+    init_process(&p1);
+    
+    Process p2 = {
+        .cmd = "nc localhost 4443"
+    };
+    pstr* r;
+    init_process(&p2);
+
+    // recvuntil
+    process_sendline(&p2, pstr_new("123ABC"));
+    usleep(10);
+    process_recvuntil(&p1, pstr_new("123"), 2);
+    r = process_recv(&p1, 100, 1);
+    assert(pstr_cmp(pstr_new("ABC\n"), r) == 0); 
+    
+    // raw send/recv
+    process_send(&p2, pstr_new_raw("\x01\x02\x03\x04", 4));
+    r = process_recv(&p1, 100, 1);
+    usleep(10);
+    assert(pstr_cmp(pstr_new_raw("\x01\x02\x03\x04", 4), r) == 0);
+
+    printf("process_test: success\n");
+}
 
 void pstr_test() {
     pstr* x;

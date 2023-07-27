@@ -16,6 +16,6 @@ int sendline(Tube* tb, pstr* ps);
 int send(Tube* tb, pstr* ps);
 void fillbuffer(Tube *tb, size_t n, float timeout, pstr* (*recv_raw)(Tube*, size_t, float));
 pstr* recv(Tube* tb, size_t n, float timeout, pstr* (*recv_raw)(Tube*, size_t, float));
-pstr* readuntil(Tube *tb, pstr* pattern, int timeout, pstr* (*recv_raw)(Tube*, size_t, float));
+pstr* recvuntil(Tube *tb, pstr* pattern, int timeout, pstr* (*recv_raw)(Tube*, size_t, float));
 
 #endif

@@ -53,7 +53,7 @@ void fillbuffer(Tube *tb, size_t n, float timeout, pstr* (*recv_raw)(Tube*, size
     If the request is not satisfied before int timeout seconds(!) pass,
     all data is buffered and an empty pstr ("") is returned.
 */
-pstr* readuntil(Tube *tb, pstr* pattern, int timeout, pstr* (*recv_raw)(Tube*, size_t, float)) {
+pstr* recvuntil(Tube *tb, pstr* pattern, int timeout, pstr* (*recv_raw)(Tube*, size_t, float)) {
     pstr* readbuf = pstr_new("");
     pstr* curr = NULL;
     pstr* rest = NULL;

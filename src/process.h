@@ -26,7 +26,7 @@ typedef struct {
 
 
 pstr* process_recv(Process *p, size_t n, float timeout);
-pstr* process_readuntil(Process *p, pstr* pattern, int timeout);
+pstr* process_recvuntil(Process *p, pstr* pattern, int timeout);
 void process_start(Process *p);
 int init_process(Process *p);
 int process_send(Process *p, pstr* ps);
