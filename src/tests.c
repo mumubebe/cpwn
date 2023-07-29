@@ -9,29 +9,24 @@
 
 
 void process_test() {
-    Process p1 = {
-        .cmd = "nc -lvnp 4443"
-    };
-    init_process(&p1);
+    Tube* t1 = pwn_process("nc -lvnp 4443");
+    sleep(1);
+    Tube* t2 = pwn_process("nc localhost 4443");
     
-    Process p2 = {
-        .cmd = "nc localhost 4443"
-    };
     pstr* r;
     pstr* s;
     pstr* t;
-    init_process(&p2);
 
     // recvuntil
     s = pstr_new("123ABC");
-    process_sendline(&p2, s);
+    pwn_sendline(t2, s);
     usleep(10);
 
     t = pstr_new("123");
-    process_recvuntil(&p1, t, 2);
+    pwn_recvuntil(t1, t, 2);
     pstr_free(t);
 
-    r = process_recv(&p1, 100, 1);
+    r = pwn_recv(t1, 100, 1);
     t = pstr_new("ABC\n");
     assert(pstr_cmp(t, r) == 0); 
     pstr_free(r);
@@ -40,10 +35,10 @@ void process_test() {
 
     // raw send/recv
     s = pstr_new_raw("\x01\x02\x03\x04", 4); 
-    process_send(&p2, s);
+    pwn_send(t2, s);
     usleep(10);
     
-    r = process_recv(&p1, 100, 1);
+    r = pwn_recv(t1, 100, 1);
     assert(pstr_cmp(s, r) == 0);
     pstr_free(r);
     pstr_free(s);

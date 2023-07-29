@@ -16,12 +16,16 @@
 #define while_timer(n) for(time_t end = time(NULL) + n; time(NULL) < end; )
 #define timeleft end-time(NULL)
 
-int tube_sendline(Tube* tb, pstr* ps) {
-    pstr* ps2 = pstr_cat_raw(ps, "\n", 1);
-    tube_send(tb, ps2);
+
+int pwn_sendline(Tube* tb, pstr* ps) {
+    pstr* ps2 = pstr_cpy(ps);
+    pstr_cat_raw(ps2, "\n", 1);
+    int length = pwn_send(tb, ps2);
+    pstr_free(ps2);
+    return length;
 }
 
-int tube_send(Tube* tb, pstr* ps) {
+int pwn_send(Tube* tb, pstr* ps) {
     int length = write(tb->fd_in, ps->buf, ps->length);
     if (length < 0) {
         perror("write");
@@ -30,17 +34,20 @@ int tube_send(Tube* tb, pstr* ps) {
 }
 
 
-pstr* tube_recv(Tube* tb, size_t n, float timeout, pstr* (*recv_raw)(Tube*, size_t, float)) {
+pstr* pwn_recv(Tube* tb, size_t n, float timeout) {
     if ((tb->buffer->length > n)) {
         return pstr_popleft(tb->buffer, n);
     } 
-    fillbuffer(tb, n, timeout, recv_raw);
+    fillbuffer(tb, n, timeout);
     
     return pstr_popleft(tb->buffer, n);
 }
 
-void fillbuffer(Tube *tb, size_t n, float timeout, pstr* (*recv_raw)(Tube*, size_t, float)) {
-    pstr* recv = recv_raw(tb, n, timeout);
+void fillbuffer(Tube *tb, size_t n, float timeout) {
+    pstr* recv;
+    if (tb->type == PROCESS_TUBE) {
+        recv = process_recv_raw(tb, n, timeout);
+    }
 
     if (recv->length > 0) {
         tb->buffer = pstr_cat_pstr(tb->buffer, recv);
@@ -54,7 +61,7 @@ void fillbuffer(Tube *tb, size_t n, float timeout, pstr* (*recv_raw)(Tube*, size
     If the request is not satisfied before int timeout seconds(!) pass,
     all data is buffered and an empty pstr ("") is returned.
 */
-pstr* tube_recvuntil(Tube *tb, pstr* pattern, int timeout, pstr* (*recv_raw)(Tube*, size_t, float)) {
+pstr* pwn_recvuntil(Tube *tb, pstr* pattern, int timeout) {
     pstr* readbuf = pstr_new("");
     pstr* curr = NULL;
     pstr* rest = NULL;
@@ -67,15 +74,14 @@ pstr* tube_recvuntil(Tube *tb, pstr* pattern, int timeout, pstr* (*recv_raw)(Tub
             pstr_cat_pstr(readbuf, curr);
         }
 
-        curr = tube_recv(tb, 1024, timeleft, recv_raw);
+        curr = pwn_recv(tb, 1024, timeleft);
 
         if (rest != NULL) {
             // fix this with a left concat later (implement in pstr).. :)
             pstr_cat_pstr(rest, curr);
             curr = rest;
         }
-        index = pstr_find(curr, pattern);
-        if (index != -1) {
+        if ((index = pstr_find(curr, pattern)) != -1) {
             // Get str up to found index
             pstr* uptoindex = pstr_popleft(curr, index+pstr_len(pattern)); 
             pstr_cat_pstr(readbuf, uptoindex);

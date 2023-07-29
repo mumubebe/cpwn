@@ -16,36 +16,11 @@ pidNode* head = NULL;
 pstr* buffer = NULL;
 
 #define READ_BLOCK 0
-#define READ_ONBLOCK 1
-
-#define while_timer(n) for(time_t end = time(NULL) + n; time(NULL) < end; )
-#define timeleft end-time(NULL)
-
+#define READ_NONBLOCK 1
 
 int process_can_recv_raw(Tube *tb, float timeout);
 pstr* process_recv_raw(Tube* tb, size_t n, float timeout);
 
-int process_sendline(Process *p, pstr *ps) {
-    tube_sendline(p->tube, ps);
-}
-
-int process_send(Process *p, pstr* ps) {
-    tube_send(p->tube, ps);    
-}
-/**
- *   Receive data until pattern is encountered.
-
-    If the request is not satisfied before int timeout seconds(!) pass,
-    all data is buffered and an empty pstr ("") is returned.
-*/
-pstr* process_recvuntil(Process *p, pstr* pattern, int timeout) {
-    return tube_recvuntil(p->tube, pattern, timeout, process_recv_raw);
-}
-
-
-pstr* process_recv(Process *p, size_t n, float timeout) {
-    tube_recv(p->tube, n, timeout, process_recv_raw);
-}
 
 
 /*
@@ -107,7 +82,7 @@ int process_can_recv_raw(Tube* tb, float timeout) {
 }
 
 
-int init_process(Process *p) {
+Tube* pwn_process(char *cmd) {
     int fd_out[2];
     int fd_in[2];
 
@@ -120,30 +95,29 @@ int init_process(Process *p) {
 
     if (pid == -1) {
         perror("fork failed:");
-        return -1;
+        return NULL;
     } 
     else if (pid > 0) {
         /* Add forked process to a pidNode linked list to keep track of all forked processes */
-
-        
         Tube* tube = malloc(sizeof(Tube)); 
+        tube->type = PROCESS_TUBE;
         
         /* init empty buffer to tube struct */
         tube->buffer = pstr_new("");       
         
-        /* Stores file descriptors in current process struct */
+        /* Stores file descriptors in current struct */
         tube->fd_out = fd_out[READ_END];
         tube->fd_in = fd_in[WRITE_END];
-        p->tube = tube;
 
+        /* Add forked process to a pidNode linked list to keep track of all forked processes */
         pidNode* pid_node = malloc(sizeof(pidNode));
-        if (!pid_node) { perror("malloc"); return -1; }
+        if (!pid_node) { perror("malloc"); return NULL; }
 
         pid_node->pid = pid;
         pid_node->next = head;
         pid_node->prev = NULL;
 
-        p->pid_node = pid_node;
+        tube->pid_node = pid_node;
 
         if (head != NULL) {
             head->prev = pid_node;
@@ -156,6 +130,8 @@ int init_process(Process *p) {
         
         /* Register kill process atexit */
         atexit(kill_processes);
+
+        return tube;
     } 
     else {
         /* Duplicate FD to FD2, closing FD2 and making it open on the same file */
@@ -170,11 +146,9 @@ int init_process(Process *p) {
         close(fd_in[READ_END]);
         close(fd_out[WRITE_END]);
         
-        char *args[] = {p->cmd, NULL};
-        char *envp[] = {NULL};
 
         /* Executes same as popen() syscall */
-        if (execl(_PATH_BSHELL, "sh", "-c", p->cmd, (char *)NULL) == -1) {
+        if (execl(_PATH_BSHELL, "sh", "-c", cmd, (char *)NULL) == -1) {
             perror("execl");
         }
         
@@ -182,8 +156,8 @@ int init_process(Process *p) {
     }
 }
 
-void process_kill(Process *p) {
-    kill_pid(p->pid_node);
+void process_kill(Tube* tb) {
+    kill_pid(tb->pid_node);
 }
 
 void kill_pid(pidNode *curr) {

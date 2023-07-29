@@ -6,6 +6,8 @@
 
 void pstr_resize_length(pstr* ps, size_t n);
 pstr* pstr_pop(pstr* ps, size_t n, int type);
+pstr* pstr_grow(pstr *ps, size_t length);
+
 
 #define POPRIGHT 0
 #define POPLEFT 1
@@ -21,7 +23,7 @@ pstr* pstr_new(char *init) {
 }
 
 /**
- * Create a binary safe pstr, expects a length 
+ * Create a binary safe pstr from a char*, expects a length 
  * 
 */
 pstr* pstr_new_raw(char *init, size_t length) {
@@ -34,6 +36,11 @@ pstr* pstr_new_raw(char *init, size_t length) {
     memcpy(ps->buf, init, length + 1);
     
     return ps;
+}
+
+
+pstr* pstr_cpy(pstr *ps) {
+    return pstr_new_raw(ps->buf, ps->length);
 }
 
 pstr* pstr_grow(pstr *ps, size_t length) {
