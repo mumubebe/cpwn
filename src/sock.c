@@ -9,13 +9,16 @@
 #include "sock.h"
 #include "tube.h"
 #include "pstr.h"
+#include "log.h"
 
 int remote_can_recv_raw(Tube* tb, float timeout);
 
-void remote_init(Sock *sock) {
+Tube* pwn_remote(char* host, int port) {
     int fd;
     struct sockaddr_in server_addr;
-
+    
+    LOG_INFO("Opening connection to %s on port %d", host, port);
+    LOG_INFO("Opening connection to %s on port %d: Trying %s", host, port, host);
     fd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (fd < 0) {
@@ -24,17 +27,18 @@ void remote_init(Sock *sock) {
     }
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(4443);
-    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_port = htons(port);
+    server_addr.sin_addr.s_addr = inet_addr(host);
 
     if(connect(fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0){
         perror("connect");
         exit(EXIT_FAILURE);
     }
-
-    printf("Connected");
+    LOG_INFO("Opening connection to %s on port %d: Done", host, port);
     
     Tube* tube = malloc(sizeof(Tube)); 
+
+    
     
     /* init empty buffer to tube struct */
     tube->buffer = pstr_new("");       
@@ -42,7 +46,9 @@ void remote_init(Sock *sock) {
     /* Tube handles both out and in fds (stdin/stdout), socket are same */
     tube->fd_out = fd;
     tube->fd_in = fd;
-    sock->tube = tube;
+    tube->type = REMOTE_TUBE;
+    
+    return tube;
 }
 
 int remote_can_recv_raw(Tube* tb, float timeout) {

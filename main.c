@@ -9,6 +9,7 @@ int main() {
     pstr_test();
     process_test();
     utils_test();    
+    remote_test();
 }
 
 

@@ -11,8 +11,8 @@ typedef struct Sock {
     Tube* tube;
 } Sock;
 
-typedef struct Sock Remote;
 
+Tube* pwn_remote(char *host, int port);
 void remote_init(Sock *sock);
 
 #endif

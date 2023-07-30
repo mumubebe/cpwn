@@ -4,5 +4,6 @@
     void pstr_test();
     void process_test();
     void utils_test();
+    void remote_test();
 
 #endif

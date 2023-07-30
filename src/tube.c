@@ -11,6 +11,7 @@
 #include "process.h"
 #include "tube.h"
 #include <time.h>
+#include "log.h"
 
 
 #define while_timer(n) for(time_t end = time(NULL) + n; time(NULL) < end; )

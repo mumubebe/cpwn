@@ -11,6 +11,7 @@
 #include "process.h"
 #include "tube.h"
 #include <time.h>
+#include "log.h"
 
 pidNode* head = NULL;
 pstr* buffer = NULL;
@@ -44,7 +45,9 @@ pstr* process_recv_raw(Tube *tb, size_t n, float timeout) {
         }
 
         if (len) {
-            return pstr_new_raw(buf, len);
+            pstr* rr = pstr_new_raw(buf, len);
+            free(buf);
+            return rr;
         }
     }
     return pstr_new("");
@@ -126,8 +129,7 @@ Tube* pwn_process(char *cmd) {
 
         close(fd_in[READ_END]);
         close(fd_out[WRITE_END]);
-
-        
+        LOG_INFO("Starting local process '%s': pid %d", cmd, pid);
         /* Register kill process atexit */
         atexit(kill_processes);
 

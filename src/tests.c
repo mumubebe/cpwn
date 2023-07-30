@@ -5,13 +5,25 @@
 #include "process.h"
 #include <sys/wait.h>
 #include <unistd.h>
+#include "sock.h"
 #include "utils.h"
+#include "log.h"
 
+void remote_test() {
+    Tube* t1 = pwn_process("nc -lvnp 4441");
+    sleep(5);
+    Tube* r1 = pwn_remote("127.0.0.1", 4441);
+    pwn_sendline(r1, pstr_new("Hello"));
+    usleep(10);
+
+    LOG_DEBUG("remote_test: success");
+
+}
 
 void process_test() {
-    Tube* t1 = pwn_process("nc -lvnp 4443");
+    Tube* t1 = pwn_process("nc -lvnp 4445");
     sleep(1);
-    Tube* t2 = pwn_process("nc localhost 4443");
+    Tube* t2 = pwn_process("nc localhost 4445");
     
     pstr* r;
     pstr* s;
@@ -43,7 +55,8 @@ void process_test() {
     pstr_free(r);
     pstr_free(s);
 
-    printf("process_test: success\n");
+    kill_processes();
+    LOG_DEBUG("process_test: success");
 }
 
 void pstr_test() {
@@ -99,7 +112,7 @@ void pstr_test() {
     pstr_free(x);
     pstr_free(y);
 
-    printf("pstr_test: success\n");
+    LOG_DEBUG("pstr_test: success");
     
 }
 
@@ -131,6 +144,6 @@ void utils_test() {
     pstr_free(x);
     pstr_free(y);
     
-    printf("utils_test: success\n");
+    LOG_DEBUG("utils_test: success");
 
 }
