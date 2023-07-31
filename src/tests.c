@@ -21,9 +21,9 @@ void remote_test() {
 }
 
 void process_test() {
-    Tube* t1 = pwn_process("nc -lvnp 4445");
-    sleep(1);
-    Tube* t2 = pwn_process("nc localhost 4445");
+    Tube* t1 = pwn_process("nc -lvnp 4444");
+    sleep(5);
+    Tube* t2 = pwn_process("nc localhost 4444");
     
     pstr* r;
     pstr* s;
@@ -120,25 +120,25 @@ void utils_test() {
     pstr* x;
     pstr* y;
 
-    x = p64(1, "little");
+    x = pwn_p64(1, "little");
     y = pstr_new_raw("\x01\x00\x00\x00\x00\x00\x00\x00", 8);
     assert(pstr_cmp(x, y) == 0);
     pstr_free(x);
     pstr_free(y);
 
-    x = p64(0xffffffffffffffff, "little");
+    x = pwn_p64(0xffffffffffffffff, "little");
     y = pstr_new_raw("\xff\xff\xff\xff\xff\xff\xff\xff", 8);
     assert(pstr_cmp(x, y) == 0);
     pstr_free(x);
     pstr_free(y);
 
-    x = p64(1, "big");
+    x = pwn_p64(1, "big");
     y = pstr_new_raw("\x00\x00\x00\x00\x00\x00\x00\x01", 8);
     assert(pstr_cmp(x, y) == 0);
     pstr_free(x);
     pstr_free(y);
     
-    x = p32(1, "little");
+    x = pwn_p32(1, "little");
     y = pstr_new_raw("\x01\x00\x00\x00", 4);
     assert(pstr_cmp(x, y) == 0);
     pstr_free(x);

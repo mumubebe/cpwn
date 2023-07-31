@@ -24,5 +24,9 @@ void pstr_free();
 void pstr_print(pstr *ps);
 void pstr_pprint(pstr *ps);
 int pstr_cmp(pstr *ps1, pstr *ps2);
+pstr* pstr_load_macro(pstr* ps1, ...);
+
+#define pstr_load(ps1, ...) pstr_load_macro(ps1, __VA_ARGS__, NULL)
+
 
 #endif 

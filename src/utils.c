@@ -12,13 +12,13 @@
 void to_bytestr(void* value, size_t size, char* output, int endian);
 int validate_endian(char* endian);
 
-pstr* p64(u_int64_t value, char *endian) {
+pstr* pwn_p64(u_int64_t value, char *endian) {
     char out64[8];
     to_bytestr(&value, sizeof(out64), out64, validate_endian(endian));
     return pstr_new_raw(out64, sizeof(out64));
 }
 
-pstr* p32(u_int32_t value, char *endian) {
+pstr* pwn_p32(u_int32_t value, char *endian) {
     char out32[4];
     to_bytestr(&value, sizeof(out32), out32, validate_endian(endian));
     return pstr_new_raw(out32, sizeof(out32));

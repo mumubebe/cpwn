@@ -11,7 +11,6 @@
 #include "process.h"
 #include "tube.h"
 #include <time.h>
-#include "log.h"
 
 
 #define while_timer(n) for(time_t end = time(NULL) + n; time(NULL) < end; )
@@ -96,4 +95,16 @@ pstr* pwn_recvuntil(Tube *tb, pstr* pattern, int timeout) {
     pstr_free(readbuf);
     pstr_free(curr);
     return pstr_new("");
+}
+
+
+void pwn_shutdown(Tube* tb, char* direction) {
+    if (strcmp("send", direction) == 0) {
+        close(tb->fd_in);
+    }
+
+    if (strcmp("recv", direction) == 0) {
+        close(tb->fd_out);
+    }
+    
 }

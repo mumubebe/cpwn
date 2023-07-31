@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <ctype.h>
 #include "pstr.h"
 
@@ -221,6 +222,27 @@ int pstr_find(pstr* ps, pstr* subps) {
 
     // No match found
     return -1;
+}
+
+/**
+ * Returns a bundle pstr, [pstr1][pstr2][pstr3]...
+ * 
+ * Each pstr is then freed
+*/
+pstr* pstr_load_macro(pstr* ps1, ...) {
+    va_list args;
+    va_start(args, ps1);
+
+    pstr* val = pstr_new("");
+    pstr* ps = ps1;
+    do {
+        pstr_cat_pstr(val, ps);
+        pstr_free(ps);
+        ps = va_arg(args, pstr*);
+    } while(ps != NULL);
+
+    va_end(args);
+    return val;
 }
 
 

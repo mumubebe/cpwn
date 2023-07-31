@@ -38,8 +38,6 @@ Tube* pwn_remote(char* host, int port) {
     
     Tube* tube = malloc(sizeof(Tube)); 
 
-    
-    
     /* init empty buffer to tube struct */
     tube->buffer = pstr_new("");       
     

@@ -27,5 +27,6 @@ int pwn_send(Tube* tb, pstr* ps);
 void fillbuffer(Tube *tb, size_t n, float timeout);
 pstr* pwn_recv(Tube* tb, size_t n, float timeout);
 pstr* pwn_recvuntil(Tube *tb, pstr* pattern, int timeout);
+void pwn_shutdown(Tube* tb, char* direction);
 
 #endif
