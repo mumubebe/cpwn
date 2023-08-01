@@ -15,7 +15,10 @@
 #include "tube.h"
 #include <time.h>
 #include <sys/select.h> 
+#include <termios.h>
 #include "log.h"
+
+struct termios tios;
 
 pidNode* head = NULL;
 pstr* buffer = NULL;
@@ -85,13 +88,15 @@ int process_can_recv_raw(Tube* tb, float timeout) {
     }
 
     if (!ret) {
-        LOG_DEBUG("process_can_recv_raw(): Cannot read data from process %d", tb->pid_node->pid);
+        LOG_DEBUG("process_can_recv_raw(): Data is not available from process %d", tb->pid_node->pid);
         return 0;
     }
 
     if (fds[0].revents & POLLIN) {
+        LOG_DEBUG("process_can_recv_raw(): Data available from process %d", tb->pid_node->pid);
         return 1;
     }
+    return 0;
 }
 
 
@@ -112,39 +117,56 @@ Tube* pwn_process(char *cmd) {
         // Open a new pseudoterminal
         if ((fdm = posix_openpt(O_RDWR | O_NOCTTY)) == -1) {
             perror("posix_openpt");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
 
         // Grant access to the slave pseudoterminal
         if (grantpt(fdm) == -1) {
             perror("grantpt");
-            exit(1);
+            exit(EXIT_FAILURE);
+        }
+
+        // Get the current terminal attributes
+        if (tcgetattr(fdm, &tios) < 0) {
+            perror("tcgetattr");
+            exit(EXIT_FAILURE);
+        }
+
+        // https://viewsourcecode.org/snaptoken/kilo/02.enteringRawMode.html
+        // raw mode
+        tios.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+        tios.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+        tios.c_cflag &= ~(CSIZE | PARENB);
+        tios.c_cflag |= CS8;
+        tios.c_oflag &= ~(OPOST);
+        tios.c_oflag &= ~ONLCR; // disable \r
+
+
+        // Set the new attributes
+        if (tcsetattr(fdm, TCSANOW, &tios) < 0) {
+            perror("tcsetattr");
+            exit(EXIT_FAILURE);
         }
 
         // Unlock the slave pseudoterminal
         if (unlockpt(fdm) == -1) {
             perror("unlockpt");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
 
         char *slave_name;
         // get slave pty name
         if ((slave_name = ptsname(fdm)) == NULL) {
             perror("ptsname_r");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
 
         // open slave pty
         if ((fds = open(slave_name, O_RDWR | O_NOCTTY)) == -1) {
             perror("open slave");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
 
-        // Fork a child process
-        if ((pid = fork()) == -1) {
-            perror("fork");
-            exit(1);
-        }
     } else {
 
         if (pipe(fd_out) == -1 || pipe(fd_in) == -1) {
@@ -152,30 +174,34 @@ Tube* pwn_process(char *cmd) {
         }
     }
 
+    // Fork a child process
+    if ((pid = fork()) == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
     
-    if (pid == 0) {  // Child process
+    // Child process
+    if (pid == 0) {
         if (TUBE_PTY) {
-        close(fdm);  // Close unused file descriptor
+            close(fdm);  // Close unused file descriptor
 
-        // Make the current process a new session leader
-        setsid();
+            // Make the current process a new session leader
+            setsid();
 
-        // Set the controlling terminal to the slave pseudoterminal
-        ioctl(fds, TIOCSCTTY, 0);
+            // Set the controlling terminal to the slave pseudoterminal
+            ioctl(fds, TIOCSCTTY, 0);
 
-        close(0); // Close standard input (current terminal)
-        close(1); // Close standard output (current terminal)
-        close(2); // Close standard error (current terminal)
-        
-        // Redirect stdin, stdout, and stderr to the slave pseudoterminal
-        dup2(fds, STDIN_FILENO);
-        dup2(fds, STDOUT_FILENO);
-        dup2(fds, STDERR_FILENO);
+            close(0); 
+            close(1); 
+            close(2); 
+            
+            dup2(fds, STDIN_FILENO);
+            dup2(fds, STDOUT_FILENO);
+            dup2(fds, STDERR_FILENO);
 
         }
         else {
             /* Duplicate FD to FD2, closing FD2 and making it open on the same file */
-            
             close(fd_in[WRITE_END]);
             close(fd_out[READ_END]);
 
@@ -193,8 +219,10 @@ Tube* pwn_process(char *cmd) {
             perror("execl");
         }
 
-        exit(1);
-    } else {  // Parent process
+        exit(EXIT_FAILURE);
+
+    // Parent
+    } else {  
 
         // Add forked process to a pidNode linked list to keep track of all forked processes
         Tube* tube = malloc(sizeof(Tube)); 
@@ -209,6 +237,9 @@ Tube* pwn_process(char *cmd) {
             tube->fd_out = fdm;
             tube->fd_in = fdm;
         } else {
+            close(fd_in[READ_END]);
+            close(fd_out[WRITE_END]);
+
             tube->fd_out = fd_out[READ_END];
             tube->fd_in = fd_in[WRITE_END];
         } 
@@ -222,23 +253,18 @@ Tube* pwn_process(char *cmd) {
         pid_node->prev = NULL;
 
         tube->pid_node = pid_node;
+        
+        // Register to kill all processes when program exits
+        if (head == NULL) {
+            atexit(kill_processes);
+        }
 
         if (head != NULL) {
             head->prev = pid_node;
         }
         head = pid_node;
 
-        if (TUBE_PTY) {
-        
-        } else {
-            close(fd_in[READ_END]);
-            close(fd_out[WRITE_END]);
-        }
-        
         LOG_INFO("Starting local process '%s': pid %d", cmd, pid);
-
-        // Register kill process atexit
-        atexit(kill_processes);
 
         return tube;
     }
@@ -266,14 +292,14 @@ void pwn_interactive(Tube* tb) {
             if (bytes <= 0) {
                 LOG_INFO("Got EOF while reading in interactive");
                 break;
-            };  // Exit loop if read fails or end of input
+            };  
 
-            buffer[bytes] = '\0';  // Ensure null-termination for string
-            printf("%s", buffer);  // Print what was read from the child process
+            buffer[bytes] = '\0';  
+            printf("%s", buffer);  
         }
 
         if (FD_ISSET(STDIN_FILENO, &set)) {  // If data is available from the user
-            if (fgets(buffer, sizeof(buffer), stdin) != NULL) {  // Read from the standard input
+            if (fgets(buffer, sizeof(buffer), stdin) != NULL) {  
                 write(tb->fd_in, buffer, strlen(buffer));  // Write to the master pseudoterminal
             }
         }

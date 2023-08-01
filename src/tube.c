@@ -27,7 +27,7 @@ int pwn_sendline(Tube* tb, pstr* ps) {
 
 int pwn_send(Tube* tb, pstr* ps) {
     int length = write(tb->fd_in, ps->buf, ps->length);
-    if (length < 0) {
+    if (length == -1) {
         perror("write");
     }
     return length;
@@ -38,6 +38,7 @@ pstr* pwn_recv(Tube* tb, size_t n, float timeout) {
     if ((tb->buffer->length > n)) {
         return pstr_popleft(tb->buffer, n);
     } 
+
     fillbuffer(tb, n, timeout);
     
     return pstr_popleft(tb->buffer, n);

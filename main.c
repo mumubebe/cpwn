@@ -6,6 +6,8 @@
 #include <assert.h>
 #include "src/tube.h"
 
+void tests();
+
 void narnia0() {
     // Spawn process
     Tube* p = pwn_process("./narnia0");
@@ -32,6 +34,7 @@ void narnia1() {
 }
 
 int main() {
+    narnia0();
     tests();
 }
 
@@ -39,7 +42,7 @@ int main() {
 
 void tests() {
     pstr_test();
-    //process_test();
+    process_test();
     utils_test();    
     remote_test();
 }

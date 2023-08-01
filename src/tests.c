@@ -10,6 +10,7 @@
 #include "log.h"
 
 void remote_test() {
+    LOG_DEBUG("--- RUNNING REMOTE TEST ---");
     Tube* t1 = pwn_process("nc -lvnp 4441");
     sleep(5);
     Tube* r1 = pwn_remote("127.0.0.1", 4441);
@@ -21,9 +22,10 @@ void remote_test() {
 }
 
 void process_test() {
-    Tube* t1 = pwn_process("nc -lvnp 4444");
-    sleep(5);
-    Tube* t2 = pwn_process("nc localhost 4444");
+    LOG_DEBUG("--- RUNNING PROCESS TEST ---");
+    Tube* t1 = pwn_process("nc -lvnp 4441");
+    sleep(2);
+    Tube* t2 = pwn_process("nc localhost 4441");
     
     pstr* r;
     pstr* s;
@@ -48,7 +50,7 @@ void process_test() {
     // raw send/recv
     s = pstr_new_raw("\x01\x02\x03\x04", 4); 
     pwn_send(t2, s);
-    usleep(10);
+    usleep(100);
     
     r = pwn_recv(t1, 100, 1);
     assert(pstr_cmp(s, r) == 0);
@@ -60,9 +62,9 @@ void process_test() {
 }
 
 void pstr_test() {
+    LOG_DEBUG("--- RUNNING PSTR TEST ---");
     pstr* x;
     pstr* y;
-    pstr* z;
 
     x = pstr_new("hello");
     assert(strlen(x->buf) == 5);
@@ -117,6 +119,7 @@ void pstr_test() {
 }
 
 void utils_test() {
+    LOG_DEBUG("--- RUNNING UTILS TEST ---");
     pstr* x;
     pstr* y;
 
