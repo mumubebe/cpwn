@@ -6,7 +6,6 @@
 
 enum Tubetype {REMOTE_TUBE, PROCESS_TUBE};
 
-
 typedef struct pidNode {
     pid_t pid;
     struct pidNode* next;
@@ -22,11 +21,11 @@ typedef struct Tube {
     pidNode* pid_node;
 } Tube;
 
-int pwn_sendline(Tube* tb, pstr* ps);
-int pwn_send(Tube* tb, pstr* ps);
-void fillbuffer(Tube *tb, size_t n, float timeout);
-pstr* pwn_recv(Tube* tb, size_t n, float timeout);
-pstr* pwn_recvuntil(Tube *tb, pstr* pattern, int timeout);
-void pwn_shutdown(Tube* tb, char* direction);
+int     pwn_sendline(Tube* tb, pstr* ps);
+int     pwn_send(Tube* tb, pstr* ps);
+void    fillbuffer(Tube *tb, size_t n, float timeout);
+pstr*   pwn_recv(Tube* tb, size_t n, float timeout);
+pstr*   pwn_recvuntil(Tube *tb, pstr* pattern, int timeout);
+void    pwn_shutdown(Tube* tb, char* direction);
 
 #endif

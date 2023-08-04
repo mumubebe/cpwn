@@ -39,6 +39,17 @@ pstr* pstr_new_raw(char *init, size_t length) {
     return ps;
 }
 
+/**
+ * Empty pstr with a length
+*/
+pstr* pstr_new_rawempty(size_t length) {
+    pstr* ps = (pstr*) malloc(sizeof(pstr));
+    ps->length = length;
+    ps->capability = length + 1;
+    ps->buf = malloc(ps->length);
+    return ps;
+}
+
 
 pstr* pstr_cpy(pstr *ps) {
     return pstr_new_raw(ps->buf, ps->length);

@@ -5,6 +5,7 @@
 #include "src/sock.h"
 #include <assert.h>
 #include "src/tube.h"
+#include "src/pelf.h"
 
 void tests();
 
@@ -34,8 +35,12 @@ void narnia1() {
 }
 
 int main() {
-    narnia0();
-    tests();
+    //narnia0();
+    //tests();
+    Elf* e = ELF("/usr/bin/cat");
+    printf("ELF size: %d\n", e->size);
+    pstr* r = pwn_elf_read(e, 0, 4); 
+    printf("%s\n", r->buf);
 }
 
 
