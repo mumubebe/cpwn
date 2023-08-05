@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <elf.h>
-#include "pstr.h"
+#include "str.h"
 
 typedef struct Eb32 {
 
@@ -24,4 +24,4 @@ typedef struct Elf {
 } Elf;
 
 Elf*    ELF(char* path);
-pstr*   pwn_elf_read(Elf* e, uint64_t addr, uint64_t count);
+str*   pwn_elf_read(Elf* e, uint64_t addr, uint64_t count);

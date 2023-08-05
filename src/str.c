@@ -3,32 +3,32 @@
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
-#include "pstr.h"
+#include "str.h"
 
-void pstr_resize_length(pstr* ps, size_t n);
-pstr* pstr_pop(pstr* ps, size_t n, int type);
-pstr* pstr_grow(pstr *ps, size_t length);
+void str_resize_length(str* ps, size_t n);
+str* str_pop(str* ps, size_t n, int type);
+str* str_grow(str *ps, size_t length);
 
 
 #define POPRIGHT 0
 #define POPLEFT 1
 
 /**
- * Create a new pstr from a char*
+ * Create a new str from a char*
  * 
  * Note that it expects a null terminated string. strlen terminates on any \x00
- * Use pstr_new_raw with a fixed length for a byte safe alternative
+ * Use str_new_raw with a fixed length for a byte safe alternative
 */
-pstr* pstr_new(char *init) {
-    return pstr_new_raw(init, strlen(init));
+str* str_new(char *init) {
+    return str_new_raw(init, strlen(init));
 }
 
 /**
- * Create a binary safe pstr from a char*, expects a length 
+ * Create a binary safe str from a char*, expects a length 
  * 
 */
-pstr* pstr_new_raw(char *init, size_t length) {
-    pstr* ps = (pstr*) malloc(sizeof(pstr));
+str* str_new_raw(char *init, size_t length) {
+    str* ps = (str*) malloc(sizeof(str));
 
     ps->length = length;
     ps->capability = length + 1;
@@ -40,10 +40,10 @@ pstr* pstr_new_raw(char *init, size_t length) {
 }
 
 /**
- * Empty pstr with a length
+ * Empty str with a length
 */
-pstr* pstr_new_rawempty(size_t length) {
-    pstr* ps = (pstr*) malloc(sizeof(pstr));
+str* str_new_rawempty(size_t length) {
+    str* ps = (str*) malloc(sizeof(str));
     ps->length = length;
     ps->capability = length + 1;
     ps->buf = malloc(ps->length);
@@ -51,11 +51,11 @@ pstr* pstr_new_rawempty(size_t length) {
 }
 
 
-pstr* pstr_cpy(pstr *ps) {
-    return pstr_new_raw(ps->buf, ps->length);
+str* str_cpy(str *ps) {
+    return str_new_raw(ps->buf, ps->length);
 }
 
-pstr* pstr_grow(pstr *ps, size_t length) {
+str* str_grow(str *ps, size_t length) {
     size_t newcap = length + ps->length;
     if (ps->capability > (newcap)) { return ps; }
 
@@ -64,17 +64,17 @@ pstr* pstr_grow(pstr *ps, size_t length) {
     return ps;
 }
 /**
- * Concat pstr with another prst, modified in place
+ * Concat str with another prst, modified in place
 */
-pstr* pstr_cat_pstr(pstr *ps1, pstr* ps2) {
-    return pstr_cat_raw(ps1, ps2->buf, ps2->length);
+str* str_cat_str(str *ps1, str* ps2) {
+    return str_cat_raw(ps1, ps2->buf, ps2->length);
 }
 
-pstr* pstr_cat_raw(pstr *ps1, char *cs, size_t length) {
+str* str_cat_raw(str *ps1, char *cs, size_t length) {
     if (length == 0) {
         return ps1;
     }
-    ps1 = pstr_grow(ps1, length + 1);
+    ps1 = str_grow(ps1, length + 1);
 
     /* Copy new str including nul byte */
     memcpy(ps1->buf + ps1->length, cs, length + 1);
@@ -83,21 +83,21 @@ pstr* pstr_cat_raw(pstr *ps1, char *cs, size_t length) {
 }
 
 /**
- * Concates pstr ps1 with a char*, expects a null terminated char*
+ * Concates str ps1 with a char*, expects a null terminated char*
  * modified in place
 */
-pstr* pstr_cat(pstr *ps1, char* cs) {
-    return pstr_cat_raw(ps1, cs, strlen(cs));
+str* str_cat(str *ps1, char* cs) {
+    return str_cat_raw(ps1, cs, strlen(cs));
 }
 
 
 /**
- * Print pstr, non printable characters will be displayed as hex (as \xFF)
+ * Print str, non printable characters will be displayed as hex (as \xFF)
  * does not include null terminator \x00
 */
-void pstr_print(pstr *ps) {
+void str_print(str *ps) {
     if (ps == NULL || ps->buf == NULL) {
-        printf("<pstr: NULL>\n");
+        printf("<str: NULL>\n");
         return;
     }
     int n = 0;
@@ -125,9 +125,9 @@ void pstr_print(pstr *ps) {
 }
 
 
-void pstr_pprint(pstr *ps) {
+void str_pprint(str *ps) {
     if (ps == NULL || ps->buf == NULL) {
-        printf("<pstr: NULL>\n");
+        printf("<str: NULL>\n");
         return;
     }
     int n = 0;
@@ -140,9 +140,9 @@ void pstr_pprint(pstr *ps) {
 }
 
 /**
- * see pstr_popright(), pstr_popleft()
+ * see str_popright(), str_popleft()
 */
-pstr* pstr_pop(pstr *ps, size_t n, int type) {
+str* str_pop(str *ps, size_t n, int type) {
     if (n > ps->length) {
         n = ps->length;
     }
@@ -154,60 +154,60 @@ pstr* pstr_pop(pstr *ps, size_t n, int type) {
 
     if (type == POPRIGHT) {
         memmove(poped, ps->buf+ps->length-n, n+1);
-        pstr_resize_length(ps, ps->length-n);
+        str_resize_length(ps, ps->length-n);
     } else {
         memmove(poped, ps->buf, n);
         poped[n+1] = '\00';
 
         memmove(ps->buf, ps->buf+n, ps->length-n);
-        pstr_resize_length(ps, ps->length-n);
+        str_resize_length(ps, ps->length-n);
     }
 
-    return pstr_new_raw(poped, n);
+    return str_new_raw(poped, n);
 }
 
 /**
- * right pop n length pstr
+ * right pop n length str
  * 
- * If a pstr1 containing "ABCDEF" and calls pop(ps, 2), the pstr1 
+ * If a str1 containing "ABCDEF" and calls pop(ps, 2), the str1 
  * will be modified in place so that it will contain "ABCD" (with null terminator) and a 
- * new, pstr2, containing "EF" returns
+ * new, str2, containing "EF" returns
  * 
 */
-pstr* pstr_popright(pstr *ps, size_t n) {
-    return pstr_pop(ps, n, POPRIGHT);
+str* str_popright(str *ps, size_t n) {
+    return str_pop(ps, n, POPRIGHT);
 }
 
 /**
- * left pop n length pstr
+ * left pop n length str
  * 
- * If a pstr1 containing "ABCDEF" and calls pop(ps, 2), the pstr1 
+ * If a str1 containing "ABCDEF" and calls pop(ps, 2), the str1 
  * will be modified in place so that it will contain "ABCD" (with null terminator) and a 
- * new, pstr2, containing "AB" returns
+ * new, str2, containing "AB" returns
  * 
 */
-pstr* pstr_popleft(pstr *ps, size_t n) {
-    return pstr_pop(ps, n, POPLEFT);
+str* str_popleft(str *ps, size_t n) {
+    return str_pop(ps, n, POPLEFT);
 }
 
 /**
- * Compare two pstr
+ * Compare two str
  * 
  * return 0 if length and buff is equal, else -1
 */
-int pstr_cmp(pstr *ps1, pstr *ps2) {
-    if (pstr_len(ps1) == pstr_len(ps2)) {
-        return memcmp(ps1->buf, ps2->buf, pstr_len(ps1));
+int str_cmp(str *ps1, str *ps2) {
+    if (str_len(ps1) == str_len(ps2)) {
+        return memcmp(ps1->buf, ps2->buf, str_len(ps1));
     }
     return -1;
 }
 
-void pstr_resize_length(pstr *ps, size_t length) {
+void str_resize_length(str *ps, size_t length) {
     ps->length = length;
     ps->buf[length] = '\00';
 }
 
-size_t pstr_len(pstr *ps) {
+size_t str_len(str *ps) {
     return ps->length; 
 }
 
@@ -217,7 +217,7 @@ size_t pstr_len(pstr *ps) {
  * Function is binary safe and will not threat any null byte as terminator
  * Return -1 if no match found
 */
-int pstr_find(pstr* ps, pstr* subps) {
+int str_find(str* ps, str* subps) {
     // If the substring is longer than the string, it can't be found
     if (subps->length > ps->length) {
         return -1;
@@ -236,20 +236,20 @@ int pstr_find(pstr* ps, pstr* subps) {
 }
 
 /**
- * Returns a bundle pstr, [pstr1][pstr2][pstr3]...
+ * Returns a bundle str, [str1][str2][str3]...
  * 
- * Each pstr is then freed
+ * Each str is then freed
 */
-pstr* pstr_load_macro(pstr* ps1, ...) {
+str* str_load_macro(str* ps1, ...) {
     va_list args;
     va_start(args, ps1);
 
-    pstr* val = pstr_new("");
-    pstr* ps = ps1;
+    str* val = str_new("");
+    str* ps = ps1;
     do {
-        pstr_cat_pstr(val, ps);
-        pstr_free(ps);
-        ps = va_arg(args, pstr*);
+        str_cat_str(val, ps);
+        str_free(ps);
+        ps = va_arg(args, str*);
     } while(ps != NULL);
 
     va_end(args);
@@ -257,7 +257,7 @@ pstr* pstr_load_macro(pstr* ps1, ...) {
 }
 
 
-void pstr_free(pstr *ps) {
+void str_free(str *ps) {
     if (ps == NULL || ps->buf == NULL) { return; }
     free(ps->buf);
 }

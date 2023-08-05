@@ -8,7 +8,7 @@
 #include <poll.h>
 #include "sock.h"
 #include "tube.h"
-#include "pstr.h"
+#include "str.h"
 #include "log.h"
 
 int remote_can_recv_raw(Tube* tb, float timeout);
@@ -39,7 +39,7 @@ Tube* pwn_remote(char* host, int port) {
     Tube* tube = malloc(sizeof(Tube)); 
 
     /* init empty buffer to tube struct */
-    tube->buffer = pstr_new("");       
+    tube->buffer = str_new("");       
     
     /* Tube handles both out and in fds (stdin/stdout), socket are same */
     tube->fd_out = fd;
@@ -73,5 +73,5 @@ int remote_can_recv_raw(Tube* tb, float timeout) {
     }
 }
 
-pstr* remote_recv_raw(Sock *s) {
+str* remote_recv_raw(Sock *s) {
 } 

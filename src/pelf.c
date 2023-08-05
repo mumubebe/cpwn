@@ -9,7 +9,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include "pelf.h"
-#include "pstr.h"
+#include "str.h"
 
 
 char* get_section_name_at_index(Eb64 *eb, int index);
@@ -47,10 +47,10 @@ Elf* ELF(char *path) {
 /**
  * Read data from the specified virtual address
  * 
- * Returns pstr*
+ * Returns str*
 */
-pstr* pwn_elf_read(Elf* e, uint64_t addr, uint64_t count) {
-    pstr* p = pstr_new_rawempty(count);
+str* pwn_elf_read(Elf* e, uint64_t addr, uint64_t count) {
+    str* p = str_new_rawempty(count);
     memcpy(p->buf, (char*)(e->addr+addr), count);
     return p;
 }

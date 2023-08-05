@@ -1,5 +1,5 @@
 
-#include "pstr.h"
+#include "str.h"
 #include "tube.h"
 
 #ifndef SOCK_H

@@ -5,14 +5,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include "tube.h"
-#include "pstr.h"
+#include "str.h"
 
 
 #define READ_END 0
 #define WRITE_END 1
 
 
-pstr*   process_recv_raw(Tube *tb, size_t n, float timeout);
+str*   process_recv_raw(Tube *tb, size_t n, float timeout);
 Tube*   pwn_process(char* cmd);
 void    pwn_interactive(Tube *tb);
 void    kill_processes();

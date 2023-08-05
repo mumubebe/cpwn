@@ -10,7 +10,7 @@
 #include <poll.h>
 #include <paths.h>
 #include <signal.h>
-#include "pstr.h"
+#include "str.h"
 #include "process.h"
 #include "tube.h"
 #include <time.h>
@@ -21,7 +21,7 @@
 struct termios tios;
 
 pidNode* head = NULL;
-pstr* buffer = NULL;
+str* buffer = NULL;
 
 #define READ_BLOCK 0
 #define READ_NONBLOCK 1
@@ -30,7 +30,7 @@ pstr* buffer = NULL;
 #define TUBE_PTY 1
 
 int process_can_recv_raw(Tube *tb, float timeout);
-pstr* process_recv_raw(Tube* tb, size_t n, float timeout);
+str* process_recv_raw(Tube* tb, size_t n, float timeout);
 
 
 
@@ -39,10 +39,10 @@ pstr* process_recv_raw(Tube* tb, size_t n, float timeout);
  * 
  * if timeout or EOF is reached, return value points to an empty string.
 */
-pstr* process_recv_raw(Tube *tb, size_t n, float timeout) {
+str* process_recv_raw(Tube *tb, size_t n, float timeout) {
     if (process_can_recv_raw(tb, timeout)) {
         char* buf = malloc(sizeof(char) * n);
-        pstr* rrecv;
+        str* rrecv;
 
         if (!buf) {
             perror("malloc");
@@ -53,16 +53,16 @@ pstr* process_recv_raw(Tube *tb, size_t n, float timeout) {
         
         if (len == -1) {
             perror("read");
-            rrecv = pstr_new("");
+            rrecv = str_new("");
         }
 
         if (len) {
-            rrecv = pstr_new_raw(buf, len);
+            rrecv = str_new_raw(buf, len);
         }
         free(buf);
         return rrecv;
     }
-    return pstr_new("");
+    return str_new("");
 }
 
 
@@ -229,7 +229,7 @@ Tube* pwn_process(char *cmd) {
         tube->type = PROCESS_TUBE;
         
         /* init empty buffer to tube struct */
-        tube->buffer = pstr_new("");       
+        tube->buffer = str_new("");       
 
         /* Stores file descriptors in current struct */
         if (TUBE_PTY) {
