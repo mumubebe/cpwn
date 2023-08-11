@@ -3,25 +3,20 @@
 #include <elf.h>
 #include "str.h"
 
-typedef struct Eb32 {
-
-} Eb32;
-
-typedef struct Eb64 {
-    Elf64_Ehdr* eh;
-    Elf64_Shdr* sh;
-    char* section_names;
-} Eb64;
 
 
-typedef struct Elf {
-    void*       elfobj;
+typedef struct Elf64 {
+    Elf64_Ehdr* elf_header;
+    Elf64_Shdr* section_header;
     void*       addr;
     char*       section_names;
     char*       endian;
+    char*       arch;
     uint64_t    entry;
     uint64_t    size;
-} Elf;
+} Elf64;
 
-Elf*    ELF(char* path);
-str*   pwn_elf_read(Elf* e, uint64_t addr, uint64_t count);
+Elf64*    ELF64(char* path);
+str*   pwn_elf64_read(Elf64* e, uint64_t addr, uint64_t count);
+
+typedef Elf64 Elf;
