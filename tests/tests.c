@@ -1,13 +1,9 @@
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
-#include "../src/str.h"
-#include "../src/process.h"
 #include <sys/wait.h>
 #include <unistd.h>
-#include "../src/sock.h"
-#include "../src/utils.h"
-#include "../src/log.h"
+#include "../includes/cpwn.h"
 
 void remote_test(); 
 void process_test();

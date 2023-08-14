@@ -5,6 +5,7 @@ TESTS_DIR = tests
 BUILD_DIR = $(TESTS_DIR)/build
 
 .PHONY: all clean
+
 all: cpwn tests
 
 cpwn:
