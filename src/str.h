@@ -10,22 +10,22 @@ typedef struct
     size_t   capability;     /* malloc size */
 } str;
 
-str*   str_new(char *init);
-str*   str_new_raw(char *init, size_t length);
-str*   str_cat(str *ps, char *cs);
-str*   str_cat_raw(str *ps, char *cs, size_t length);
-str*   str_cat_str(str *ps, str* cs);
-str*   str_popleft(str *ps, size_t n);
-str*   str_popright(str *ps, size_t n);
-str*   str_cpy(str* ps);
-size_t  str_len(str *ps);
-str*   str_new_rawempty(size_t length);
-int     str_find(str *ps, str* subps);
-void    str_free();
-void    str_print(str *ps);
-void    str_pprint(str *ps);
-int     str_cmp(str *ps1, str *ps2);
-str*   str_load_macro(str* ps1, ...);
+extern str*   str_new(char *init);
+extern str*   str_new_raw(char *init, size_t length);
+extern str*   str_cat(str *ps, char *cs);
+extern str*   str_cat_raw(str *ps, char *cs, size_t length);
+extern str*   str_cat_str(str *ps, str* cs);
+extern str*   str_popleft(str *ps, size_t n);
+extern str*   str_popright(str *ps, size_t n);
+extern str*   str_cpy(str* ps);
+extern size_t  str_len(str *ps);
+extern str*   str_new_rawempty(size_t length);
+extern int     str_find(str *ps, str* subps);
+extern void    str_free();
+extern void    str_print(str *ps);
+extern void    str_pprint(str *ps);
+extern int     str_cmp(str *ps1, str *ps2);
+extern str*   str_load_macro(str* ps1, ...);
 
 #define str_load(ps1, ...) str_load_macro(ps1, __VA_ARGS__, NULL)
 

@@ -1,13 +1,25 @@
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
-#include "str.h"
-#include "process.h"
+#include "../src/str.h"
+#include "../src/process.h"
 #include <sys/wait.h>
 #include <unistd.h>
-#include "sock.h"
-#include "utils.h"
-#include "log.h"
+#include "../src/sock.h"
+#include "../src/utils.h"
+#include "../src/log.h"
+
+void remote_test(); 
+void process_test();
+void str_test(); 
+void utils_test();
+
+int main() {
+    remote_test();
+    process_test();
+    str_test();
+    utils_test();
+}
 
 void remote_test() {
     LOG_DEBUG("--- RUNNING REMOTE TEST ---");

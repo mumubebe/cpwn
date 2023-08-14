@@ -41,6 +41,7 @@ Elf64* ELF64(char *path) {
         exit(EXIT_FAILURE);
     }
 
+    elf->path = path;
     elf->size = sbuf.st_size;
 
     elf->addr = (uint64_t)mmap(NULL, sbuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
@@ -74,6 +75,15 @@ Elf64* ELF64(char *path) {
     load_64header(elf);
 
     return elf;    
+}
+
+void checksec64(Elf64* elf) { }
+
+void checksec(char* path, char* arch, int btype, char* endian) {
+    LOG_INFO(
+        "'%s'\n\tArch:%s-%s-%s", 
+        path, arch, btype, endian);
+
 }
 
 void load_64header(Elf64* elf) {

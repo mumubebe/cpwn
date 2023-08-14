@@ -21,11 +21,11 @@ typedef struct Tube {
     pidNode* pid_node;
 } Tube;
 
-int     pwn_sendline(Tube* tb, str* ps);
-int     pwn_send(Tube* tb, str* ps);
-void    fillbuffer(Tube *tb, size_t n, float timeout);
-str*   pwn_recv(Tube* tb, size_t n, float timeout);
-str*   pwn_recvuntil(Tube *tb, str* pattern, int timeout);
-void    pwn_shutdown(Tube* tb, char* direction);
+extern int     pwn_sendline(Tube* tb, str* ps);
+extern int     pwn_send(Tube* tb, str* ps);
+extern void    fillbuffer(Tube *tb, size_t n, float timeout);
+extern str*   pwn_recv(Tube* tb, size_t n, float timeout);
+extern str*   pwn_recvuntil(Tube *tb, str* pattern, int timeout);
+extern void    pwn_shutdown(Tube* tb, char* direction);
 
 #endif

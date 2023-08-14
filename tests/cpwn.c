@@ -1,13 +1,11 @@
-#include "process.h"
-#include "str.h"
-#include "utils.h"
-#include "tests.h"
-#include "sock.h"
+#include "../src/process.h"
+#include "../src/str.h"
+#include "../src/utils.h"
+#include "../src/sock.h"
 #include <assert.h>
-#include "tube.h"
-#include "pelf.h"
+#include "../src/tube.h"
+#include "../src/pelf.h"
 
-void tests();
 
 void narnia0() {
     // Spawn process
@@ -47,9 +45,3 @@ int main() {
 
 
 
-void tests() {
-    str_test();
-    process_test();
-    utils_test();    
-    remote_test();
-}
