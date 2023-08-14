@@ -14,6 +14,9 @@
 
 
 void load_64header(Elf64* elf); 
+char* section_name_at_index(Elf64 *elf, int index);
+int index_by_section_name(Elf64 *elf, char* name);
+
 
 int open_elf(char* path) {
     int fd = open(path, O_RDONLY);
@@ -40,7 +43,7 @@ Elf64* ELF64(char *path) {
 
     elf->size = sbuf.st_size;
 
-    elf->addr = mmap(NULL, sbuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
+    elf->addr = (uint64_t)mmap(NULL, sbuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
     if (strncmp(elf->addr+1, "ELF", 3)) {
         LOG_INFO("File is not an ELF\n");
         exit(EXIT_FAILURE);
@@ -48,6 +51,25 @@ Elf64* ELF64(char *path) {
 
     Elf64_Ehdr* header = (Elf64_Ehdr*) elf->addr; 
     elf->elf_header = header;
+
+
+    Elf64_Shdr* section_header = (Elf64_Shdr*) ((char*)elf->addr + header->e_shoff);
+    elf->section_header = section_header;
+
+    // Set section header string table
+    char *section_name = (char*)elf->addr + elf->section_header[elf->elf_header->e_shstrndx].sh_offset;
+    elf->section_header_string_table = section_name;
+
+    printf("%s\n", section_name_at_index(elf, 12));
+
+    Elf64_Shdr* plt = &section_header[index_by_section_name(elf, ".plt")];
+    printf("%s\n", ((char*)elf->section_header_string_table + plt->sh_name));
+    printf("%d\n", (int)plt->sh_offset);
+
+    str* pltstr = pwn_elf64_read(elf, plt->sh_offset, plt->sh_size);
+    str_print(pltstr);
+    
+
 
     load_64header(elf);
 
@@ -59,7 +81,7 @@ void load_64header(Elf64* elf) {
 
     elf->endian = header->e_ident[EI_DATA] == ELFDATA2LSB ? "little" : "big";
     
-    // set architecture
+    // relabel only a handful architectures for now..
     uint16_t e_machine = header->e_machine;
     switch(e_machine) {
         case EM_X86_64:
@@ -99,6 +121,20 @@ void load_64header(Elf64* elf) {
 }
 
 
+
+
+int index_by_section_name(Elf64 *elf, char* name) {
+    for (int i=0; i < elf->elf_header->e_shnum; i++) {
+        if (strcmp(section_name_at_index(elf, i), name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+char* section_name_at_index(Elf64 *elf, int index) {
+    return &elf->section_header_string_table[elf->section_header[index].sh_name]; 
+}
 
 
 /**

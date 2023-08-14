@@ -1,11 +1,11 @@
-#include "src/process.h"
-#include "src/str.h"
-#include "src/utils.h"
-#include "src/tests.h"
-#include "src/sock.h"
+#include "process.h"
+#include "str.h"
+#include "utils.h"
+#include "tests.h"
+#include "sock.h"
 #include <assert.h>
-#include "src/tube.h"
-#include "src/pelf.h"
+#include "tube.h"
+#include "pelf.h"
 
 void tests();
 
@@ -42,6 +42,7 @@ int main() {
     str* r = pwn_elf64_read(e, 0, 4); 
     printf("%s\n", e->endian);
     printf("%s\n", e->arch);
+    printf("\n");
 }
 
 
