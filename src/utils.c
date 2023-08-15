@@ -6,46 +6,56 @@
 #include <stdio.h>
 
 #define LENDIAN 0
-#define BENDIAN 1 
+#define BENDIAN 1
 
+void to_bytestr(void *value, size_t size, char *output, int endian);
+int validate_endian(char *endian);
 
-void to_bytestr(void* value, size_t size, char* output, int endian);
-int validate_endian(char* endian);
-
-str* pwn_p64(u_int64_t value, char *endian) {
+str *pwn_p64(u_int64_t value, char *endian)
+{
     char out64[8];
     to_bytestr(&value, sizeof(out64), out64, validate_endian(endian));
     return str_new_raw(out64, sizeof(out64));
 }
 
-str* pwn_p32(u_int32_t value, char *endian) {
+str *pwn_p32(u_int32_t value, char *endian)
+{
     char out32[4];
     to_bytestr(&value, sizeof(out32), out32, validate_endian(endian));
     return str_new_raw(out32, sizeof(out32));
 }
 
-int validate_endian(char* endian) {
-    if (strcmp(endian, "little") == 0) {
+int validate_endian(char *endian)
+{
+    if (strcmp(endian, "little") == 0)
+    {
         return LENDIAN;
     }
-    else if (strcmp(endian, "big") == 0) {
+    else if (strcmp(endian, "big") == 0)
+    {
         return BENDIAN;
-    } else {
+    }
+    else
+    {
         printf("error: only 'small' or 'big' are valid params for endian\n");
         exit(EXIT_FAILURE);
     }
 }
 
-
-
-void to_bytestr(void* value, size_t size, char* output, int endian) {
-    if(endian == LENDIAN) {
-        for (size_t i = 0; i < size; i++) {
-            output[i] = *((char*)value + i) & 0xFF;
+void to_bytestr(void *value, size_t size, char *output, int endian)
+{
+    if (endian == LENDIAN)
+    {
+        for (size_t i = 0; i < size; i++)
+        {
+            output[i] = *((char *)value + i) & 0xFF;
         }
-    } else {
-        for (size_t i = 0; i < size; i++) {
-            output[size - 1 - i] = *((char*)value + i) & 0xFF;
+    }
+    else
+    {
+        for (size_t i = 0; i < size; i++)
+        {
+            output[size - 1 - i] = *((char *)value + i) & 0xFF;
         }
     }
 }

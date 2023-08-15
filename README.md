@@ -2,6 +2,8 @@
 
 
 ```c
+#include "includes/cpwn.h"
+
 void narnia0() {
     // Spawn process
     Tube* p = pwn_process("./narnia0");

@@ -3,17 +3,34 @@
 
 #include <stdio.h>
 
-
-typedef enum {
+typedef enum
+{
+    LOG_LEVEl_ERROR,
     LOG_LEVEL_INFO,
-    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_DEBUG
 } LogLevel;
 
 extern LogLevel loglevel;
 
-#define LOG_INFO(format, ...) do { if (loglevel >= LOG_LEVEL_INFO) printf("[INFO] " format "\n", ##__VA_ARGS__); } while(0)
-#define LOG_DEBUG(format, ...) do { if (loglevel >= LOG_LEVEL_DEBUG) printf("[DEBUG] " format "\n", ##__VA_ARGS__); } while(0)
+#define LOG_ERROR(format, ...)                             \
+    do                                                     \
+    {                                                      \
+        if (loglevel >= LOG_LEVEl_ERROR)                   \
+            printf("[ERROR] " format "\n", ##__VA_ARGS__); \
+    } while (0)
+#define LOG_INFO(format, ...)                             \
+    do                                                    \
+    {                                                     \
+        if (loglevel >= LOG_LEVEL_INFO)                   \
+            printf("[INFO] " format "\n", ##__VA_ARGS__); \
+    } while (0)
+#define LOG_DEBUG(format, ...)                             \
+    do                                                     \
+    {                                                      \
+        if (loglevel >= LOG_LEVEL_DEBUG)                   \
+            printf("[DEBUG] " format "\n", ##__VA_ARGS__); \
+    } while (0)
 
-extern void set_log_level (LogLevel level);
+extern void set_log_level(LogLevel level);
 
 #endif
