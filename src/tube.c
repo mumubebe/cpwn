@@ -46,6 +46,14 @@ str *pwn_recv(Tube *tb, size_t n, float timeout)
     return str_popleft(tb->buffer, n);
 }
 
+str *pwn_recvline(Tube *tb, int timeout)
+{
+    str *nl = str_new("\n");
+    str *res = pwn_recvuntil(tb, nl, timeout);
+    str_free(nl);
+    return res;
+}
+
 void fillbuffer(Tube *tb, size_t n, float timeout)
 {
     str *recv;

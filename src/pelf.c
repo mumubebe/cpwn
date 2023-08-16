@@ -161,7 +161,7 @@ void load_64header(Elf64 *elf)
         elf->arch = "ia64";
         break;
     default:
-        elf->arch = "unknown";
+        elf->arch = "other";
         break;
     }
 }

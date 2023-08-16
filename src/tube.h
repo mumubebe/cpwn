@@ -30,6 +30,7 @@ extern int pwn_sendline(Tube *tb, str *ps);
 extern int pwn_send(Tube *tb, str *ps);
 extern void fillbuffer(Tube *tb, size_t n, float timeout);
 extern str *pwn_recv(Tube *tb, size_t n, float timeout);
+extern str *pwn_recvline(Tube *tb, int timeout);
 extern str *pwn_recvuntil(Tube *tb, str *pattern, int timeout);
 extern void pwn_shutdown(Tube *tb, char *direction);
 
