@@ -58,8 +58,19 @@ str_print(r2); // \xad\xde\xad\xde
 ```
 
 ## ELF Manipulation
+```c
+Elf64 *e = ELF64("./bin")
+
+printf("%s\n", e->endian); // little
+printf("%s\n", e->arch); // amd64
+printf("0x%lx\n", (uint64_t)symbols(e, "print_flag")); // 0x4030f7
 
 
+str *r = pwn_elf64_read(e, 1, 4);
+str_print(r); // ELF
+```
+
+TODO: Resolve dynamic sections (.plt .got)
 
 ## Example CTF
 ```c

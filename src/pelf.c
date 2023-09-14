@@ -86,7 +86,7 @@ uint64_t symbols64(Elf64 *elf, char *symbol)
     int i = index_by_section_name(elf, ".strtab");
     if (i == -1)
     {
-        printf(".strtab not found \n");
+        LOG_DEBUG(".strtab not found \n");
         return 0;
     }
     Elf64_Shdr *strtab_header = &elf->section_header[i];
@@ -95,7 +95,7 @@ uint64_t symbols64(Elf64 *elf, char *symbol)
     int symtab_index = index_by_section_name(elf, ".symtab");
     if (symtab_index == -1)
     {
-        LOG_INFO(".symtab not found \n");
+        LOG_DEBUG(".symtab not found \n");
         return 0;
     }
 
@@ -104,6 +104,7 @@ uint64_t symbols64(Elf64 *elf, char *symbol)
 
     for (int i = 0; i < symheader->sh_size / symheader->sh_entsize; i++)
     {
+        //printf("%s - 0x%lx\n", &strtab[symtab[i].st_name], symtab[i].st_value);
         if (strcmp(&strtab[symtab[i].st_name], symbol) == 0)
         {
             return symtab[i].st_value;
