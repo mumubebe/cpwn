@@ -3,11 +3,9 @@
 
 int main()
 {
-    Elf *e = ELF64("./tests/build/cpwn");
-    printf("ELF size: %d\n", (int)e->size);
-    str *r = pwn_elf64_read(e, 0, 4);
-    str_print(r);
-    printf("%s\n", e->endian);
-    printf("%s\n", e->arch);
-    printf("0x%lx\n", (uint64_t)symbols(e, "pwn_sendline"));
+    
+    printf("Arch: %s\n", pwn_context.arch);
+    pwn_context.arch = "amd64";
+    printf("Arch: %s\n", pwn_context.arch);
+    which_bintools("objdump");
 }

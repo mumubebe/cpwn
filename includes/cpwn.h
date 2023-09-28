@@ -5,3 +5,5 @@
 #include "../src/str.h"
 #include "../src/tube.h"
 #include "../src/utils.h"
+#include "../src/asm.h"
+#include "../src/context.h"
